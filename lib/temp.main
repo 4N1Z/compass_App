@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _hasPermission = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchPermissionStatus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Builder(builder: (context) {
+          if (_hasPermission) {
+            return _buildCompass();
+          } else {
+            return _buildPermissionSheet();
+          }
+        }),
+      ),
+    );
+  }
+
+// Compass Widget
+
+  Widget _buildCompass() {
+    return Container(
+      child: Image.asset('lib/images/compass.webp',
+      color: Colors.black,),
+      
+    );
+  }
+
+// Permssion Widget
+  Widget _buildPermissionSheet() {
+    return Center(
+      child: ElevatedButton(
+        child: const Text('Request Permission'),
+        onPressed: () {
+          Permission.locationWhenInUse.request().then((ignored) {
+            _fetchPermissionStatus();
+          });
+        },
+      ),
+    );
+  }
+
+  void _fetchPermissionStatus() {
+    Permission.locationWhenInUse.status.then((status) {
+      if (mounted) {
+        setState(() => _hasPermission = status == PermissionStatus.granted);
+      }
+    });
+  }
+}
